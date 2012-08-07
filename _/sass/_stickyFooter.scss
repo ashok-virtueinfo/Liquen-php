@@ -1,0 +1,19 @@
+/* Taken from Ryan Fait
+/* http://ryanfait.com/resources/footer-stick-to-bottom-of-page/ */
+
+* {
+margin: 0;
+}
+html, body {
+height: 100%;
+}
+.amictus { //latin for wrapping
+min-height: 100%;
+height: auto !important;
+height: 100%;
+margin: 0 auto $altoFooter * -1;
+}
+footer, .footer, .urgeo {// urgeo is latin for push
+height: $altoFooter;
+//clear: both;//un-comment for multiple layouts
+}

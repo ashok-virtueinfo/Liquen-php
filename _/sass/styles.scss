@@ -1,0 +1,87 @@
+$azulHover:#06e;
+
+@import "compass/css3";
+@import "_normals";
+
+//@import url(http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700,700italic);//Our current favourite 'PT Sans'
+$defaultFontStack: Helmet, Freesans, sans-serif;
+//$defaultFontStack: "PT Sans", Helmet, Freesans, sans-serif;
+
+$altoFooter : 150px;
+@import "_stickyFooter";
+/* un-comment to see stickyFooter at work. */
+//footer{	background-color:#F1F1F1;}
+
+body {font-family:$defaultFontStack;}
+
+/* Working with only this class is possible to build a responsive layout
+/* sólo con esta clase es posible hecer que el sitio completo responda al ancho de pantalla*/
+.wrapper{
+    width:960px;
+    margin:0 auto;
+}
+
+.ejemplos{
+	padding: 0;
+	li{
+		list-style: none;
+		background-color:#DFE3D9;
+		padding: 5px;
+		margin-bottom: 0.5em;
+		//text-align: right;
+		figure{
+			//float:left;
+			//background-color:#f1f1f1;
+			padding: 7px;
+		}
+		code{
+			@include inline-block;
+			vertical-align: top;
+			max-width:520px;
+			text-align: left;
+		}
+	}
+}
+code{
+	border:1px solid #8DA08C;
+	border-radius: 5px;
+	@include single-box-shadow(rgba(0,0,0,0.3),1px, 1px,3px,0,true);
+	padding:0.5em;
+	pre{margin:0;}
+}
+
+/* Media queries!
+/*-------------------------------------------------------------------------------*/
+/*
+/* Set big backgrounds here to avoid the small browsers loading unnnecesary content OR load them with javascript
+/* Define los fondos grandes en este media query para evitar que carguen innecesariamente en navegadores más pequeños
+//*/
+@media screen and (min-width: 960px) {
+    
+}
+@media screen and (max-width: 960px) {
+    .wrapper{
+        width:auto;
+        margin:0;
+    }
+}
+
+/* Consider this: www.cloudfour.com/css-media-query-for-mobile-is-fools-gold/ */
+/*iPhone 4 y iPad horizontal, Samsung & HTC WVGA horizonal have at least 800*/
+@media screen and (max-width: 799px) {
+    
+}
+/* max-device-width al parecer es sólo reconocido por smartphones*/
+@media screen and (max-width: 480px) {
+    
+        
+}
+
+@media all and (orientation: portrait) {
+    
+}
+
+@media all and (orientation: landscape) {
+    
+}
+

@@ -1,0 +1,42 @@
+/* the humans responsible & colophon */
+/* humanstxt.org */
+
+            ``...-------..``
+         `.-------------------.`
+      `.--------........---------.    
+    `.------.``           ``.------. 
+   .-----.`                   .------`
+  .-----.                       .-----`
+ .-----:--.``------.``.-----.`   .-----`
+`-----:///////////////////////-`  .----.
+`-----..`.////.```-////.```-///-   -----`
+.----.   `://:    `///:     ///:   -----`
+.----.   `://:    `///:     ///:`  -----`
+`-----`  `://:    `///:     ///:` `----- 
+ .----.  `-::-     :::-     ///:``-----` 
+ `-----.                    ://:``----.  
+  `.-----`                  .///:.``.. 
+    .------.`               ``:////:-  
+     `.-------..```  ````..--.``-::/:` 
+       ``----------------------.   ``
+           `..-------------..`
+                `````````     
+
+/* TEAM */
+  Design: Violeta Sánchez Espinoza
+  Site: http://medula.cl
+  Location: Santiago, Chile
+
+  Chef: B. Agustín Amenabar Larraín
+  Site: http://medula.cl
+  Twitter: @ImINaBAR (en) / @baamenabar (es)
+  Location: Santiago, Chile
+
+/* THANKS */
+  Names (& URL): 
+  ASCII image generator: ( http://www.text-image.com/convert/pic2ascii.cgi )
+
+/* SITE */
+  Standards: HTML5, CSS3
+  Components: Modernizr, Respond, jQuery
+  Software: Notepad++, Sublime Text 2, Compass, Git
