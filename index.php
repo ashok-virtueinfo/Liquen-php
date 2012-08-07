@@ -53,6 +53,9 @@ include "_/inc/datos-globales.php";
 	<header>
 		<div id="logoTop"><img src="imgs/logo-liquen.png" width="25%" alt="Logotipo <?php echo $nombreMarca; ?>"></div>
 		<h1>Liquen Image Resize Class</h1>
+		<p>
+			<a href="https://github.com/baamenabar/Liquen-php">https://github.com/baamenabar/Liquen-php</a>
+		</p>
 		<h2>Cropping</h2>
 		<nav>
 		
