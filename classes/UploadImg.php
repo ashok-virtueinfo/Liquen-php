@@ -1,28 +1,63 @@
 <?php
+/*
+ * jQuery File Upload Plugin PHP Class 5.3
+ * https://github.com/blueimp/jQuery-File-Upload
+ *
+ * Copyright 2010, Sebastian Tschan
+ * https://blueimp.net
+ *
+ 
+ MIT License
+ ===========
+ 
+ Copyright 2010, Sebastian Tschan https://blueimp.net
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a
+ copy of this software and associated documentation files (the "Software"),
+ to deal in the Software without restriction, including without limitation
+ the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ and/or sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ DEALINGS IN THE SOFTWARE.
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/MIT
 
-/*****************************************************************************
 
-Liquen Core Class: Upolad
+Liquen Core Class: Upolad 
 
-******************************************************************************
-MIT License (MIT)
-Copyright (c) 2012 Agustin Amenabar
+//********************* Modified (truncated) by Agustin Amenabar
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-******************************************************************************/
+*******************************************************************************/
 
 class UploadImg
 {
     protected $options = array(
-        'uploadDir'=>'upload/',
+        'upload_dir'=>'upload/',
+        'script_url'=>'./',
+        'upload_url' => null,
         'absolute_dir'=>'',
-        'paramName'=>'files',
-        'overwriteFiles'=>false
+        'param_name'=>'files',
+        'overwriteFiles'=>false,
+        'accept_file_types'=>'/\.(gif|jpe?g|png)$/i',
+        'max_file_size'=> null,
+        'min_file_size'=>1,
+        'max_number_of_files'=>null,
+        'max_width'=>0,
+        // Image resolution restrictions:
+        'max_width' => null,
+        'max_height' => null,
+        'min_width' => 1,
+        'min_height' => 1
         );
 
     function __construct(array $newOptions=null) {
@@ -33,9 +68,10 @@ class UploadImg
                 }
             }
         }
+        $this->options['upload_url'] = $this->get_full_url().'/'.$this->options['upload_dir'];
     }
 
-    protected function getFullUrl() {
+    protected function get_full_url() {
         $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
       	return
     		($https ? 'https://' : 'http://').
@@ -47,12 +83,7 @@ class UploadImg
     }
 
     protected function set_file_delete_url($file) {
-        $file->delete_url = $this->options['script_url']
-            .'?file='.rawurlencode($file->name);
-        $file->delete_type = $this->options['delete_type'];
-        if ($file->delete_type !== 'DELETE') {
-            $file->delete_url .= '&_method=DELETE';
-        }
+      
     }
 
     protected function get_file_object($file_name) {
@@ -160,11 +191,6 @@ class UploadImg
             preg_match('/^image\/(gif|jpe?g|png)/', $type, $matches)) {
             $file_name .= '.'.$matches[1];
         }
-        if ($this->options['discard_aborted_uploads']) {
-            while(is_file($this->options['upload_dir'].$file_name)) {
-                $file_name = $this->upcount_name($file_name);
-            }
-        }
         return $file_name;
     }
 
@@ -175,6 +201,8 @@ class UploadImg
     
 
     protected function handle_file_upload($uploaded_file, $name, $size, $type, $error, $index = null) {
+        echo "handling file upload
+        ";
         $file = new stdClass();
         $file->name = $this->trim_file_name($name, $type, $index);
         $file->size = intval($size);
@@ -182,8 +210,7 @@ class UploadImg
         if ($this->validate($uploaded_file, $file, $error, $index)) {
             $this->handle_form_data($file, $index);
             $file_path = $this->options['upload_dir'].$file->name;
-            $append_file = !$this->options['discard_aborted_uploads'] &&
-                is_file($file_path) && $file->size > filesize($file_path);
+            $append_file = false && is_file($file_path) && $file->size > filesize($file_path);
             clearstatcache();
             if ($uploaded_file && is_uploaded_file($uploaded_file)) {
                 // multipart/formdata uploads (POST method uploads)
@@ -206,21 +233,8 @@ class UploadImg
             }
             $file_size = filesize($file_path);
             if ($file_size === $file->size) {
-            	if ($this->options['orient_image']) {
-            		$this->orient_image($file_path);
-            	}
                 $file->url = $this->options['upload_url'].rawurlencode($file->name);
-                foreach($this->options['image_versions'] as $version => $options) {
-                    if ($this->create_scaled_image($file->name, $options)) {
-                        if ($this->options['upload_dir'] !== $options['upload_dir']) {
-                            $file->{$version.'_url'} = $options['upload_url']
-                                .rawurlencode($file->name);
-                        } else {
-                            clearstatcache();
-                            $file_size = filesize($file_path);
-                        }
-                    }
-                }
+                
             } else if ($this->options['discard_aborted_uploads']) {
                 unlink($file_path);
                 $file->error = 'abort';
@@ -234,11 +248,8 @@ class UploadImg
     
 
     public function post() {
-        if (isset($_REQUEST['_method']) && $_REQUEST['_method'] === 'DELETE') {
-            return $this->delete();
-        }
         $upload = isset($_FILES[$this->options['param_name']]) ?
-            $_FILES[$this->options['param_name']] : null;
+        $_FILES[$this->options['param_name']] : null;
         $info = array();
         if ($upload && is_array($upload['tmp_name'])) {
             // param_name is an array identifier like "files[]",
@@ -287,7 +298,7 @@ class UploadImg
         } else {
             header('Content-type: text/plain');
         }
-        echo $json;
+        exit( $json );
     }
 
     

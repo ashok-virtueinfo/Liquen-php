@@ -1,6 +1,8 @@
 <?php
 include "_/inc/datos-globales.php";
-?><!doctype html>
+?>
+
+<!doctype html>
 
 <!--[if lt IE 8 ]>    <html class="ie ie7 no-js" lang="es"> <![endif]-->
 <!--[if IE 8 ]>    <html class="ie ie8 no-js" lang="es"> <![endif]-->
@@ -333,8 +335,9 @@ $fotoDiez=$lii->genImage(array(
 					</code></li>
 			</ul>
 			<hr>
-		<form action="<?php echo $_SERVER['PHP_SELF']; ?>" id="uploadTest" method="multipart/form-data">
-			<label >Select Image File To Upload: <input type="file" name="image"></label>
+		<form action="simple_upload.php" id="uploadTest" method="post" enctype="multipart/form-data">
+			<label >Select Image File To Upload: <input type="file" name="files"></label>
+			<button type="submit" name="wantUpload" value="true">Upload Image</button>
 		</form>
 	</div>
 
