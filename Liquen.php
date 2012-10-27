@@ -2,7 +2,9 @@
 
 /*****************************************************************************
 
-Liquen Core Class: LiquenImg
+Liquen Standalone: Liquen
+this is a self instanciating version of the liquenImg class.
+it could be smaller, but it's esier to mantain this way.
 
 ******************************************************************************
 MIT License (MIT)
@@ -20,13 +22,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 TO DO:
 
-- error log and error reporting for the class.
+- finish error log and error reporting for the class.
 - image rotation
 
 *****************************/
 
 
-class LiquenImg
+class Liquen
 {
 	protected $cacheFolder = 'imgs/';// MUST have trailing slash
 	protected $sourceFolder = 'upload/';// MUST have trailing slash
@@ -674,14 +676,14 @@ class LiquenImg
 			return $this->_errors;
 		}
 }
-/*
-this is for testing Liquen Standalone
-if(isset($_GET['dc'])){
-	//if(!isset($_GET['o']))$_GET['o']='';
-	$lii = new LiquenImg(NULL, true);
+
+
+
+if(isset($_GET['setup'])){
+	$lii = new Liquen();
+}else{
+	$lii = new Liquen(NULL, true);
 	exit();
-}else if(isset($_GET['setup'])){
-	$lii = new LiquenImg();
-}*/
+}
 
 ?>
