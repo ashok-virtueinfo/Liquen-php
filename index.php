@@ -70,7 +70,7 @@ include "_/inc/datos-globales.php";
 include "classes/LiquenImg.php";
 $lii=new LiquenImg(); 
 $dirFoto=$lii->genImage(array(
-	'url'=>'la cuchilla.jpg',
+	'url'=>'upload/la cuchilla.jpg',
 	'oc'=>'1',
 	'width'=>'300'
 	));
@@ -174,7 +174,6 @@ $lii=new LiquenImg();
 				</figure>
 					<code>
 						<pre>
-$dirFoto=$lii->genImage(array(
 	'url'=>'la cuchilla.jpg',
 	'oc'=>'1',
 	'width'=>'300'
@@ -333,6 +332,18 @@ $fotoDiez=$lii->genImage(array(
 	));
 						</pre>
 					</code></li>
+				<li>
+					<a href="one_image.php">Return the actual image with <strong>getImage()</strong>.</a>
+				</li>
+				<li><p>Or load it here</p>
+				<img src="one_image.php" alt="This file loads liquen and returns an image."> </li>
+
+				<li>
+					<figure>
+						<img src="classes/LiquenImg.php?dc&url=../assets/huilmo-rosado.jpg&w=300">
+						<figcaption></figcaption>
+					</figure>
+				</li>
 			</ul>
 			<hr>
 		<form action="simple_upload.php" id="uploadTest" method="post" enctype="multipart/form-data">

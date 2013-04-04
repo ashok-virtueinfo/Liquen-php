@@ -284,7 +284,11 @@ class Liquen
 				}
 			}
 		}
-		$this->cachedFile = $this->cacheFolder.implode('_', $this->cachedFile).'_uuu-'.$name.'.'.$this->configs['extension'];
+		if (isset($name_no_extension)) {//this should not be tested here, but had to make a quick fix.
+			$this->cachedFile = $this->cacheFolder.implode('_', $this->cachedFile).'.'.$this->configs['extension'];
+		}else{
+			$this->cachedFile = $this->cacheFolder.implode('_', $this->cachedFile).'_uuu-'.$name.'.'.$this->configs['extension'];
+		}
 		if(is_file($this->cachedFile) && (!isset($this->options['overwriteCached']) || !$this->options['overwriteCached'])){
 			return $this->cachedFile;
 		}
@@ -443,15 +447,15 @@ class Liquen
 				}
 				
 				if($this->options['cropAlignment'][1]=='c'){//horizontal
-					if($currentAspectRatio >= $newAspectRatio)$this->configs['srcX']=floor(($srcWidth-$this->configs['width'])/2);
+					if($currentAspectRatio >= $newAspectRatio)$this->configs['srcX']=floor(($this->configs['srcWidth']-$this->configs['width'])/2);
 				}else if($this->options['cropAlignment'][1]=='r'){
-					if($currentAspectRatio >= $newAspectRatio)$this->configs['srcX']=floor(($srcWidth-$this->configs['width']));
+					if($currentAspectRatio >= $newAspectRatio)$this->configs['srcX']=floor(($this->configs['srcWidth']-$this->configs['width']));
 				}
 
 				if($this->options['cropAlignment'][0]=='c'){//vertical
-					if($currentAspectRatio < $newAspectRatio)$this->configs['srcY']=floor(($srcHeight-$this->configs['height'])/2);
+					if($currentAspectRatio < $newAspectRatio)$this->configs['srcY']=floor(($this->configs['srcHeight']-$this->configs['height'])/2);
 				}else if($this->options['cropAlignment'][0]=='b'){
-					if($currentAspectRatio < $newAspectRatio)$this->configs['srcY']=floor(($srcHeight-$this->configs['height']));
+					if($currentAspectRatio < $newAspectRatio)$this->configs['srcY']=floor(($this->configs['srcHeight']-$this->configs['height']));
 				}
 			}else{//cropping disabled is assumed
 				if($currentAspectRatio >= $newAspectRatio){//src image is proportionaly wider than the target size

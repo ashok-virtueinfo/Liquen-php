@@ -10,13 +10,13 @@ $images = glob("{*.jpg,*.jpeg,*.png,*.gif,*.JPG,*.JPEG,*.PNG,*.GIF}", GLOB_BRACE
 <!-- the "no-js" class is for Modernizr. Ojo con el lang-->
 <head>
 	<!--<meta charset="utf-8"> -->
-	<title> </title>
+	<title> File list </title>
 </head>
-<body>
+<body style="font-family: monospace, sans-serif;">
 
 <ul>
 	<?php foreach ($images as $img): ?>
-	<li><?php echo '<a href="'.$img.'">'.$img."</a><br>\n"; ?></li>
+	<li><?php echo filemtime($img).' &ndash; <a href="'.$img.'">'.$img."</a>"; ?></li>
 	<?php endforeach ?>
 </ul>
 

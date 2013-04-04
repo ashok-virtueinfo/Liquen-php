@@ -145,8 +145,8 @@ class LiquenImg
 		}
 		$this->configs = $this->configsDefaults;//sets configs
 		$initAnswer = $this->init();
-		if(!$initAnswer)return;//there was something wrong
-		if($initAnswer === true)$this->processImage();//only if obsolute truth is returned process the image, otherwise the image was cached.
+		if($initAnswer === false)return;//there was something wrong
+		if($initAnswer == NULL)$this->processImage();//only if no answer returned, process the image, otherwise the image was cached.
 		if($returnImage){
 			$theImageUrl='';
 			if(is_file($this->cachedFile)){
@@ -180,6 +180,7 @@ class LiquenImg
 		}
 		if($this->processImage() === false)return false;
 		if(is_file($this->cachedFile)){
+			
 			if ($absoluteURL) {
 				return $this->absoluteUrlCachedFile();
 			}
@@ -282,7 +283,11 @@ class LiquenImg
 				}
 			}
 		}
-		$this->cachedFile = $this->cacheFolder.implode('_', $this->cachedFile).'_uuu-'.$name.'.'.$this->configs['extension'];
+		if (isset($name_no_extension)) {//this should not be tested here, but had to make a quick fix.
+			$this->cachedFile = $this->cacheFolder.implode('_', $this->cachedFile).'.'.$this->configs['extension'];
+		}else{
+			$this->cachedFile = $this->cacheFolder.implode('_', $this->cachedFile).'_uuu-'.$name.'.'.$this->configs['extension'];
+		}
 		if(is_file($this->cachedFile) && (!isset($this->options['overwriteCached']) || !$this->options['overwriteCached'])){
 			return $this->cachedFile;
 		}
@@ -310,9 +315,6 @@ class LiquenImg
 				break;
 			case 'image/png':
 				$loadedImage = imagecreatefrompng( $this->sourceFolder.$this->options['url'] );
-				break;
-			case 'image/bmp' || 'image/x-ms-bmp':
-				$loadedImage = $this->imagecreatefrombmp( $this->sourceFolder.$this->options['url'] );//imagecreatefrombmp is VERY processor intensive and is the fastest I found, use only if needed, it takes it's toll on my 6 core AMD Phenom
 				break;
 		}
 
@@ -441,15 +443,15 @@ class LiquenImg
 				}
 				
 				if($this->options['cropAlignment'][1]=='c'){//horizontal
-					if($currentAspectRatio >= $newAspectRatio)$this->configs['srcX']=floor(($srcWidth-$this->configs['width'])/2);
+					if($currentAspectRatio >= $newAspectRatio)$this->configs['srcX']=floor(($this->configs['srcWidth'] - $this->configs['width'])/2);
 				}else if($this->options['cropAlignment'][1]=='r'){
-					if($currentAspectRatio >= $newAspectRatio)$this->configs['srcX']=floor(($srcWidth-$this->configs['width']));
+					if($currentAspectRatio >= $newAspectRatio)$this->configs['srcX']=floor(($this->configs['srcWidth'] - $this->configs['width']));
 				}
 
 				if($this->options['cropAlignment'][0]=='c'){//vertical
-					if($currentAspectRatio < $newAspectRatio)$this->configs['srcY']=floor(($srcHeight-$this->configs['height'])/2);
+					if($currentAspectRatio < $newAspectRatio)$this->configs['srcY']=floor(($this->configs['srcHeight'] - $this->configs['height'])/2);
 				}else if($this->options['cropAlignment'][0]=='b'){
-					if($currentAspectRatio < $newAspectRatio)$this->configs['srcY']=floor(($srcHeight-$this->configs['height']));
+					if($currentAspectRatio < $newAspectRatio)$this->configs['srcY']=floor(($this->configs['srcHeight'] - $this->configs['height']));
 				}
 			}else{//cropping disabled is assumed
 				if($currentAspectRatio >= $newAspectRatio){//src image is proportionaly wider than the target size
@@ -506,7 +508,7 @@ class LiquenImg
 		//print_r($this);
 		$this->background=str_split(substr($this->options['backgroundColor'], 2),2);
 		if(count($this->background) < 4)$this->background[]='FF';
-		return true;
+		//return true;//¿Por qué había puesto return true?
 	}
 
 	protected function processImage(){
@@ -564,102 +566,6 @@ class LiquenImg
 		/* after this we could load a manual */
 	}
 
-	/*********************************************/
-	/* Fonction: ImageCreateFromBMP              */
-	/* Author:   DHKold                          */
-	/* Contact:  admin@dhkold.com                */
-	/* Date:     The 15th of June 2005           */
-	/* Version:  2.0B                            */
-	/*********************************************/
-	//http://php.net/manual/en/function.imagecreate.php
-
-	private function ImageCreateFromBMP($filename){
-		//Ouverture du fichier en mode binaire
-		if (! $f1 = fopen($filename,"rb")) return FALSE;
-
-		//1 : Chargement des ent�tes FICHIER
-		$FILE = unpack("vfile_type/Vfile_size/Vreserved/Vbitmap_offset", fread($f1,14));
-		if ($FILE['file_type'] != 19778) return FALSE;
-
-		//2 : Chargement des ent�tes BMP
-		$BMP = unpack('Vheader_size/Vwidth/Vheight/vplanes/vbits_per_pixel'.
-		             '/Vcompression/Vsize_bitmap/Vhoriz_resolution'.
-		             '/Vvert_resolution/Vcolors_used/Vcolors_important', fread($f1,40));
-		$BMP['colors'] = pow(2,$BMP['bits_per_pixel']);
-		if ($BMP['size_bitmap'] == 0) $BMP['size_bitmap'] = $FILE['file_size'] - $FILE['bitmap_offset'];
-		$BMP['bytes_per_pixel'] = $BMP['bits_per_pixel']/8;
-		$BMP['bytes_per_pixel2'] = ceil($BMP['bytes_per_pixel']);
-		$BMP['decal'] = ($BMP['width']*$BMP['bytes_per_pixel']/4);
-		$BMP['decal'] -= floor($BMP['width']*$BMP['bytes_per_pixel']/4);
-		$BMP['decal'] = 4-(4*$BMP['decal']);
-		if ($BMP['decal'] == 4) $BMP['decal'] = 0;
-
-		//3 : Chargement des couleurs de la palette
-		$PALETTE = array();
-		if ($BMP['colors'] < 16777216)
-		{
-		$PALETTE = unpack('V'.$BMP['colors'], fread($f1,$BMP['colors']*4));
-		}
-
-		//4 : Cr�ation de l'image
-		$IMG = fread($f1,$BMP['size_bitmap']);
-		$VIDE = chr(0);
-
-		$res = imagecreatetruecolor($BMP['width'],$BMP['height']);
-		$P = 0;
-		$Y = $BMP['height']-1;
-		while ($Y >= 0)
-		{
-		$X=0;
-		while ($X < $BMP['width'])
-		{
-		 if ($BMP['bits_per_pixel'] == 24)
-		    $COLOR = unpack("V",substr($IMG,$P,3).$VIDE);
-		 elseif ($BMP['bits_per_pixel'] == 16)
-		 {  
-		    $COLOR = unpack("n",substr($IMG,$P,2));
-		    $COLOR[1] = $PALETTE[$COLOR[1]+1];
-		 }
-		 elseif ($BMP['bits_per_pixel'] == 8)
-		 {  
-		    $COLOR = unpack("n",$VIDE.substr($IMG,$P,1));
-		    $COLOR[1] = $PALETTE[$COLOR[1]+1];
-		 }
-		 elseif ($BMP['bits_per_pixel'] == 4)
-		 {
-		    $COLOR = unpack("n",$VIDE.substr($IMG,floor($P),1));
-		    if (($P*2)%2 == 0) $COLOR[1] = ($COLOR[1] >> 4) ; else $COLOR[1] = ($COLOR[1] & 0x0F);
-		    $COLOR[1] = $PALETTE[$COLOR[1]+1];
-		 }
-		 elseif ($BMP['bits_per_pixel'] == 1)
-		 {
-		    $COLOR = unpack("n",$VIDE.substr($IMG,floor($P),1));
-		    if     (($P*8)%8 == 0) $COLOR[1] =  $COLOR[1]        >>7;
-		    elseif (($P*8)%8 == 1) $COLOR[1] = ($COLOR[1] & 0x40)>>6;
-		    elseif (($P*8)%8 == 2) $COLOR[1] = ($COLOR[1] & 0x20)>>5;
-		    elseif (($P*8)%8 == 3) $COLOR[1] = ($COLOR[1] & 0x10)>>4;
-		    elseif (($P*8)%8 == 4) $COLOR[1] = ($COLOR[1] & 0x8)>>3;
-		    elseif (($P*8)%8 == 5) $COLOR[1] = ($COLOR[1] & 0x4)>>2;
-		    elseif (($P*8)%8 == 6) $COLOR[1] = ($COLOR[1] & 0x2)>>1;
-		    elseif (($P*8)%8 == 7) $COLOR[1] = ($COLOR[1] & 0x1);
-		    $COLOR[1] = $PALETTE[$COLOR[1]+1];
-		 }
-		 else
-		    return FALSE;
-		 imagesetpixel($res,$X,$Y,$COLOR[1]);
-		 $X++;
-		 $P += $BMP['bytes_per_pixel'];
-		}
-		$Y--;
-		$P+=$BMP['decal'];
-		}
-
-		//Fermeture du fichier
-		fclose($f1);
-
-		return $res;
-	}
-
 	public function getError($nombre=false){
 		if($nombre===false){
 			return (bool) count($this->_errors);
@@ -670,9 +576,9 @@ class LiquenImg
 		return false;
 	}
 
-		public function getErrors(){
-			return $this->_errors;
-		}
+	public function getErrors(){
+		return $this->_errors;
+	}
 }
 /*
 this is for testing Liquen Standalone
