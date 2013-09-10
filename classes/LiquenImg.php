@@ -36,6 +36,7 @@ class LiquenImg
 	protected $shorthand = array(
 		'u' =>'url',
 		'o' =>'outputFolder',
+		'on' => 'outputName',
 		'w' =>'width',
 		'h' =>'height',
 		'p' =>'percent',
@@ -68,6 +69,7 @@ class LiquenImg
 	protected $defaults = array(
 		'url'=>NULL,
 		'outputFolder'=>NULL,//re-defines the cacheFolder. Must be relative to instanciation of class.
+		'outputName' => NULL,//defines a custom output image name, without image format
 		'width'=>0,
 		'height'=>0,
 		'percent'=>100,
@@ -180,7 +182,7 @@ class LiquenImg
 		}
 		if($this->processImage() === false)return false;
 		if(is_file($this->cachedFile)){
-			
+
 			if ($absoluteURL) {
 				return $this->absoluteUrlCachedFile();
 			}
@@ -268,26 +270,31 @@ class LiquenImg
 		}
 
 		//build cache name and check if already on cache
-		$this->cachedFile=array();
-		if( isset($this->options['rename']) && ( $this->options['rename'] === 'false' || !$this->options['rename'] ) ){// if we want to mantain the name of the file (potentially rewriting it)
-			$name_no_extension = explode('.', $name);
-			array_splice($name_no_extension, -1);//remove the src extension
-			$this->cachedFile[]=implode('.', $name_no_extension);
-		} else{
-			$requestedExtension='jpg';
-			foreach ($this->shorthand as $key => $value){
-				if($key == 'u'){
-					//$this->cachedFile[] = $name;
-				}elseif (isset($this->options[$value]) && $key!='oc' && $key!='o' && $key!='rn' && $key!='ft') {
-					$this->cachedFile[]=$key.$this->options[$value];
+		if ( isset($this->options['outputName']) ){ // custom output name
+			$this->cachedFile = $this->cacheFolder.$this->options['outputName'].'.'.$this->configs['extension'];
+		} else {
+			$this->cachedFile=array();
+			if( isset($this->options['rename']) && ( $this->options['rename'] === 'false' || !$this->options['rename'] ) ){// if we want to mantain the name of the file (potentially rewriting it)
+				$name_no_extension = explode('.', $name);
+				array_splice($name_no_extension, -1);//remove the src extension
+				$this->cachedFile[]=implode('.', $name_no_extension);
+			} else {
+				$requestedExtension='jpg';
+				foreach ($this->shorthand as $key => $value){
+					if($key == 'u'){
+						//$this->cachedFile[] = $name;
+					}elseif (isset($this->options[$value]) && $key!='oc' && $key!='o' && $key!='rn' && $key!='ft') {
+						$this->cachedFile[]=$key.$this->options[$value];
+					}
 				}
 			}
+			if (isset($name_no_extension)) {//this should not be tested here, but had to make a quick fix.
+				$this->cachedFile = $this->cacheFolder.implode('_', $this->cachedFile).'.'.$this->configs['extension'];
+			} else {
+				$this->cachedFile = $this->cacheFolder.implode('_', $this->cachedFile).'_uuu-'.$name.'.'.$this->configs['extension'];
+			}
 		}
-		if (isset($name_no_extension)) {//this should not be tested here, but had to make a quick fix.
-			$this->cachedFile = $this->cacheFolder.implode('_', $this->cachedFile).'.'.$this->configs['extension'];
-		}else{
-			$this->cachedFile = $this->cacheFolder.implode('_', $this->cachedFile).'_uuu-'.$name.'.'.$this->configs['extension'];
-		}
+
 		if(is_file($this->cachedFile) && (!isset($this->options['overwriteCached']) || !$this->options['overwriteCached'])){
 			return $this->cachedFile;
 		}
@@ -334,7 +341,7 @@ class LiquenImg
 			$this->configs['cRectangle']->height = $this->options['cropRectangleHeight'];
 		}
 
-			
+
 		//origin point
 		$currentAspectRatio = $this->configs['width'] / $this->configs['height'];
 
@@ -348,7 +355,7 @@ class LiquenImg
 			}else{
 				$this->configs['height'] = $this->configs['width'];
 			}
-				
+
 		}
 
 		//Percent Change
@@ -393,7 +400,7 @@ class LiquenImg
 				$this->configs['endWidth'] = $this->options['max'];
 				$this->configs['endHeight'] = $this->configs['endWidth'] / $currentAspectRatio;
 			}
-			
+
 		}
 		//set the length for the shortest side
 		elseif ( $this->options['min'] ) {
@@ -428,7 +435,7 @@ class LiquenImg
 
 		$this->configs['dst_width']=$this->configs['endWidth'];
 		$this->configs['dst_height']=$this->configs['endHeight'];
-		
+
 		if (!$this->configs['cRectangle']) {
 			//calculate the origin point according to the crop type
 			if($this->options['crop']){
@@ -441,7 +448,7 @@ class LiquenImg
 				}else{
 					$this->configs['height']=$this->configs['width']/$newAspectRatio;
 				}
-				
+
 				if($this->options['cropAlignment'][1]=='c'){//horizontal
 					if($currentAspectRatio >= $newAspectRatio)$this->configs['srcX']=floor(($this->configs['srcWidth'] - $this->configs['width'])/2);
 				}else if($this->options['cropAlignment'][1]=='r'){
@@ -461,7 +468,7 @@ class LiquenImg
 				}
 			}
 		}
-		
+
 		if($this->configs['cRectangle']){
 			$this->configs['srcX'] = $this->configs['cRectangle']->x;
 			$this->configs['srcY'] = $this->configs['cRectangle']->y;
@@ -487,10 +494,10 @@ class LiquenImg
 				$this->configs['endWidth'] = $this->options['width'];
 				$this->configs['endHeight'] = $this->options['height'];
 			}
-			
+
 			$this->configs['dst_width'] = $this->configs['endWidth'];
 			$this->configs['dst_height'] = $this->configs['endHeight'];
-			
+
 			if( (  $this->options['height'] ) && (  $this->options['width'] ) ){
 				$newAspectRatio = $this->options['width'] / $this->options['height'];
 				if( $newAspectRatio < $currentAspectRatio ){
@@ -517,7 +524,7 @@ class LiquenImg
 		$backgroundColor = imagecolorallocatealpha($newImage, hexdec($this->background[0]), hexdec($this->background[1]), hexdec($this->background[2]), (((~((int)hexdec($this->background[3]))) & 0xff) >> 1));//The fifth parameter of imagecolorallocatealpha is a 7bit integer // $alpha7 = ((~((int)$alpha8)) & 0xff) >> 1;// http://php.net/manual/es/function.imagecolorallocatealpha.php
 		imagefill($newImage, 0, 0, $backgroundColor);
 		imagecopyresampled( $newImage , $this->srcImage , $this->configs['endX'] , $this->configs['endY'] , $this->configs['srcX'] , $this->configs['srcY'] , $this->configs['dst_width'] , $this->configs['dst_height'] , $this->configs['width'] , $this->configs['height'] );
-		
+
 		switch( $this->configs['extension'] )
 		{
 			case 'jpg':
@@ -532,7 +539,7 @@ class LiquenImg
 		}
 		imagedestroy( $newImage );
 	}
-	
+
 	protected function absoluteUrlCachedFile(){
 		if (is_file($this->cachedFile)) {
 			$protocol = 'http';
@@ -546,7 +553,7 @@ class LiquenImg
 		//Check if default src and destination folders exist
 		$haveCacheFolder=true;
 		$haveSourceFolder=true;
-		if (!@is_dir($this->cacheFolder)) {//if the folder doesn't exist 
+		if (!@is_dir($this->cacheFolder)) {//if the folder doesn't exist
 			if( !@mkdir($this->cacheFolder, 0755) ){//create it
 				$this->_errors['cacheFolder']='There`s no destination folder and could not be created';
 			}
